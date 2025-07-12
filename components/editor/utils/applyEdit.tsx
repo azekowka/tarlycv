@@ -9,7 +9,8 @@ export const applyEdit = async (
 ) => {
   const model = editor.getModel()
   if (!model) return
-  model.setValue(initialText)
+  
+  // Apply the edit directly to the selected range without resetting the entire document
   model.pushEditOperations(
     [],
     [

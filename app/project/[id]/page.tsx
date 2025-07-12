@@ -1,4 +1,5 @@
 'use client'
+import '@ungap/with-resolvers'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import SideNav from '@/components/nav/side-nav'
 import LatexRenderer from '@/components/latex-render/latex'

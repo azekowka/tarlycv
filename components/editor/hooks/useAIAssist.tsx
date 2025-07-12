@@ -24,50 +24,37 @@ export const useAIAssist = () => {
       )
 
       const oldText = model.getValueInRange(range)
-      const context = `Replace lines ${selection.startLineNumber}-${selection.endLineNumber}:\n${oldText}`
-
       const userInput = await promptModal(editor, monacoInstance, selection)
 
+      // Only send the selected text as context, not the entire file
       const { output } = await generate(
-        `File content:\n${initialText}\n\nContext: ${context}\n\nUser input: ${userInput}`
+        `Selected text to modify:\n${oldText}\n\nUser request: ${userInput}\n\nPlease provide ONLY the modified version of the selected text. Do not include any other parts of the document.`
       )
 
       let newText = ''
-      let oldDecorations: string[] = []
-      let currentLine = selection.startLineNumber
-      let buffer = ''
       setIsStreaming(true)
 
-
+      // Collect all streamed content first, don't apply edits during streaming
       for await (const delta of readStreamableValue(output)) {
         if (!delta) continue
-        buffer += delta.content
-        if (buffer.endsWith('\n') || buffer.length > 0) {
-          newText += buffer
-          const {
-            diffText,
-            decorations,
-            currentLine: updatedLine,
-          } = calculateDiff(oldText, newText, monacoInstance, selection)
-          currentLine = updatedLine
-          await applyEdit(editor, initialText, range, diffText)
-          oldDecorations = editor.deltaDecorations(oldDecorations, decorations)
-          buffer = ''
-        }
+        newText += delta.content
       }
 
       setIsStreaming(false)
       
-      const contentWidget = createContentWidget(
-        editor,
-        monacoInstance,
-        selection,
-        oldText,
-        newText,
-        currentLine,
-        oldDecorations
-      )
-      editor.addContentWidget(contentWidget)
+      // Only apply the edit once when streaming is complete
+      if (newText.trim()) {
+        model.pushEditOperations(
+          [],
+          [
+            {
+              range: range,
+              text: newText.trim(),
+            },
+          ],
+          () => null
+        )
+      }
     })
   }
 

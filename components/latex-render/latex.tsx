@@ -1,4 +1,5 @@
 'use client'
+import '@ungap/with-resolvers'
 import { useState, useEffect, useMemo } from 'react'
 import { pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
