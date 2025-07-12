@@ -60,6 +60,7 @@ export const useAIAssist = () => {
           
           editor.addContentWidget(contentWidget);
           
+          /* This was applying the change before user approval
           editor.executeEdits('ai-assist', [
             {
               range: new monacoInstance.Range(
@@ -71,6 +72,7 @@ export const useAIAssist = () => {
               text: diffText,
             },
           ]);
+          */
         }
       }
     );
