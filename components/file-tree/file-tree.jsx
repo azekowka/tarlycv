@@ -170,11 +170,23 @@ const FileTree = ({ projectId, query = '' }) => {
     if (type === 'folder') {
       db.transact([tx.files[id].update({ isExpanded: isExpanded })])
     } else if (type === 'file') {
-      const previouslyOpenFile = filesData.files.find((file) => file.isOpen)
-      const updates = [tx.files[id].update({ isOpen: true })]
-      if (previouslyOpenFile) {
-        updates.push(tx.files[previouslyOpenFile.id].update({ isOpen: false }))
+      const updates = [];
+      
+      // Set the clicked file as the main file and open it
+      updates.push(tx.files[id].update({ isOpen: true, main_file: true }));
+      
+      // Find any other file that was previously the main file and unmark it
+      const previousMainFile = filesData.files.find(file => file.main_file && file.id !== id);
+      if (previousMainFile) {
+        updates.push(tx.files[previousMainFile.id].update({ main_file: false, isOpen: false }));
       }
+      
+      // Also, ensure any file that was just 'open' but not main is also closed.
+      const previouslyOpenFile = filesData.files.find((file) => file.isOpen && file.id !== id);
+      if (previouslyOpenFile && previouslyOpenFile.id !== (previousMainFile && previousMainFile.id)) {
+        updates.push(tx.files[previouslyOpenFile.id].update({ isOpen: false }));
+      }
+      
       db.transact(updates)
     }
   }
