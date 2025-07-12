@@ -69,6 +69,12 @@
   }
 }
 
+/* Hide the Instant Devtools widget */
+div[class*="instant-devtools"] {
+  display: none !important;
+}
+
+
 @layer base {
   * {
     @apply border-border;

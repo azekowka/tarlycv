@@ -42,9 +42,7 @@ export default function SideNav() {
       <div className="flex-grow overflow-auto">
         <FileTree projectId={projectId} query={query} />
       </div>
-      <div className="mt-auto">
-        <Profile />
-      </div>
+
     </div>
   )
 }

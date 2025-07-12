@@ -19,7 +19,7 @@ export default function NotFound() {
           </p>
         </div>
         <Link
-          href="/"
+          href="/projects"
           className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
         >
           <Home className="w-5 h-5 mr-2" />

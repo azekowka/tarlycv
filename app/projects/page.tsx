@@ -1,6 +1,12 @@
 'use client'
 import { useState } from 'react'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SearchIcon, PlusIcon } from 'lucide-react'
@@ -8,15 +14,19 @@ import ProjectNav from '@/components/projects/project-nav'
 import Link from 'next/link'
 import ProjectSkeleton from '@/components/projects/project-skeleton'
 import ProjectCard from '@/components/projects/project-card'
-import { useFrontend } from '@/contexts/FrontendContext'
-import { getAllProjects } from '@/hooks/data'
+import { useFrontend } from '@/contexts/FrontendContext';
+import { useAllProjects } from '@/hooks/data';
 
 export default function Projects() {
-  const { user } = useFrontend();
+  const { user, isLoading: userIsLoading } = useFrontend();
   const [searchTerm, setSearchTerm] = useState('');
-  const { isLoading, error, data } = getAllProjects(user.id);
+  const {
+    isLoading: projectsIsLoading,
+    error,
+    data,
+  } = useAllProjects(user?.id);
 
-  if (isLoading) return <ProjectSkeleton />
+  if (userIsLoading || projectsIsLoading) return <ProjectSkeleton />;
 
   const projects = data?.projects || []
   const filteredProjects = projects.filter((project) => project.title.toLowerCase().includes(searchTerm.toLowerCase()))

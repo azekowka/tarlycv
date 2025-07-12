@@ -1,51 +1,112 @@
-'use client'
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { usePathname } from 'next/navigation'
-import { db } from '@/lib/constants'
-import { tx } from '@instantdb/react'
-// TODO: Add types
-const FrontendContext = createContext<any>(undefined)
+'use client';
 
-export function FrontendProvider({ children }: { children: ReactNode }) {
-  const { user, isLoading } = db.useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useMemo,
+  useContext,
+  Dispatch,
+} from 'react';
+import { db as instantDb } from '@/lib/constants';
+
+// Define the shape of the context data
+interface FrontendContextType {
+  user: any | null;
+  auth: any | null;
+  db: any; // Consider defining a more specific type for your db instance
+  isLoading: boolean;
+  error: any;
+  projects: any[]; // Define a more specific type for projects
+  fetchProjects: () => void;
+  // TODO: remove this and let projects be fetched by id
+  currentProject: any;
+  setCurrentProject: (project: any) => void;
+}
+
+// Create the context with a default value
+export const FrontendContext = createContext<FrontendContextType | undefined>(
+  undefined
+);
+
+// Create a provider component
+export const FrontendProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [user, setUser] = useState<any | null>(null);
+  const [auth, setAuth] = useState<any | null>(null);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
+  const [currentProject, setCurrentProject] = useState<any>(null);
+
+  const db: any = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return instantDb;
+    }
+  }, []);
+
+  const fetchProjects = async () => {
+    if (!db || !user) return;
+    setIsLoading(true);
+    try {
+      const projectsData = await db
+        .find('projects')
+        .where('user_id', '==', user.id)
+        .do();
+      setProjects(projectsData);
+    } catch (err) {
+      console.error('Failed to fetch projects:', err);
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!isLoading && user === null && pathname !== '/') {
-      router.push('/login')
+    const mockUser = {
+      id: 'anonymous-user-id',
+      email: 'guest@example.com',
+      // Add any other user properties your app might need
+    };
+    setUser(mockUser);
+    setIsLoading(false);
+
+    return () => {
+      // Cleanup if needed
+    };
+  }, [db]);
+
+  useEffect(() => {
+    if (user && db) {
+      fetchProjects();
     }
-  }, [isLoading, user, router, pathname])
-
-  if (isLoading) {
-    return null;
-  }
-  
-  // useEffect(() => {
-  //   if (user) {
-  //     const userProperties = Object.entries(user).reduce((acc, [key, value]) => {
-  //       if (key !== 'id') {
-  //         acc[key] = value;
-  //       }
-  //       return acc;
-  //     }, {} as Record<string, any>);
-
-  //     db.transact(tx.users[user.id].update(userProperties));
-  //   }
-  // }, [user]);
+  }, [user, db]);
 
   const value = {
     user,
+    auth,
+    db,
     isLoading,
-  }
-  return <FrontendContext.Provider value={value}>{children}</FrontendContext.Provider>
-}
+    error,
+    projects,
+    fetchProjects,
+    currentProject,
+    setCurrentProject,
+  };
 
+  return (
+    <FrontendContext.Provider value={value}>
+      {children}
+    </FrontendContext.Provider>
+  );
+};
+
+// Custom hook to use the frontend context
 export const useFrontend = () => {
-  const context = useContext(FrontendContext)
+  const context = useContext(FrontendContext);
   if (context === undefined) {
-    throw new Error('useFrontend must be used within a FrontendProvider')
+    throw new Error('useFrontend must be used within a FrontendProvider');
   }
-  return context
-}
+  return context;
+};

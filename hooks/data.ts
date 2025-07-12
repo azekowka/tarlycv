@@ -27,7 +27,7 @@ export function useProjectFiles(projectId: string, userId: string) {
   })
 }
 
-export function getAllProjects(userId: string) {
+export function useAllProjects(userId: string | null | undefined) {
   return db.useQuery({
     projects: {
       $: {
@@ -36,7 +36,7 @@ export function getAllProjects(userId: string) {
         },
       },
     },
-  })
+  });
 }
 
 export function getAllProjectFiles(projectId: string, userId: string) {
