@@ -36,8 +36,9 @@ export default function SideNav() {
         </Link>
         <ModeToggle />
       </div>
-      <div className="p-4 flex space-x-2">
-        <Input placeholder="Search files..." className="flex-grow" value={query} onChange={(e) => setQuery(e.target.value)} />
+      <div className="p-4 flex space-x-2 relative">
+        <Search className="absolute left-7 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input placeholder="Search resumes..." className="flex-grow pl-10" value={query} onChange={(e) => setQuery(e.target.value)} />
       </div>
       <div className="flex-grow overflow-auto">
         <FileTree projectId={projectId} query={query} />
