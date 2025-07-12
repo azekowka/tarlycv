@@ -147,7 +147,7 @@ function LatexRenderer() {
                 Generating...
               </>
             ) : (
-              'Generate PDF'
+              'Compile PDF'
             )}
           </Button>
           <Switch checked={autoFetch} onCheckedChange={(checked) => updateProject(projectId, { isAutoFetching: checked })} />
@@ -163,8 +163,9 @@ function LatexRenderer() {
           <Button variant="outline" size="sm" onClick={handleResetZoom}>
             <RotateCcw className="h-4 w-4" />
           </Button>
-          <Button size="sm" onClick={handleDownload}>
+          <Button size="sm" variant="destructive" className="flex items-center gap-2" onClick={handleDownload}>
             <Download className="h-4 w-4" />
+            Export PDF
           </Button>
         </div>
       </div>
