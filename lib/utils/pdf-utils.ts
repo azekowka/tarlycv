@@ -42,11 +42,13 @@ interface EditorFiles {
 }
 
 export async function fetchPdf(files: EditorFiles[]) {
-    if (!files.some((file) => file.name === 'main.tex')) {
+    const mainFile = files.find(file => file.main_file);
+
+    if (!mainFile) {
         const errorData = {
-            error: 'Missing File',
-            message: 'No main.tex file found',
-            details: 'The main.tex file is required for LaTeX compilation.'
+            error: 'Missing Main File',
+            message: 'No main file designated for compilation.',
+            details: 'Please ensure one file is set as the main document.'
         };
         console.error('Error fetching PDF:', errorData);
         throw new Error(`${errorData.error}: ${errorData.message}\n\nDetails: ${errorData.details}`);
@@ -54,9 +56,10 @@ export async function fetchPdf(files: EditorFiles[]) {
 
     const formData = new FormData();
     
-    // Use a sequential loop to avoid race conditions
     for (const file of files) {
         if (file.type === 'file') {
+            const isMain = file.id === mainFile.id;
+            const fileName = isMain ? 'main.tex' : file.pathname;
             const extension = file.name.split('.').pop()?.toLowerCase();
             let mimeType: string;
             
@@ -75,20 +78,22 @@ export async function fetchPdf(files: EditorFiles[]) {
                     mimeType = 'image/svg+xml';
                     break;
                 default:
-                    // Skip unsupported files
-                    continue;
+                    // If it's the main file but doesn't have a .tex extension, treat it as one.
+                    if (isMain) {
+                        mimeType = 'text/plain';
+                    } else {
+                        continue;
+                    }
             }
 
-            const pathname = file.pathname;
-
             let blob: Blob;
-            if (extension !== 'tex' && typeof file.content === 'string') {
+            if (extension !== 'tex' && typeof file.content === 'string' && !isMain) {
                 const response = await fetch(file.content);
                 blob = await response.blob();
             } else {
                 blob = new Blob([file.content], { type: mimeType });
             }
-            formData.append(pathname, blob, pathname);
+            formData.append(fileName, blob, fileName);
         }
     }
 
