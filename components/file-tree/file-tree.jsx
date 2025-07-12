@@ -4,12 +4,10 @@ import { Tree } from 'react-arborist'
 import { db } from '@/lib/constants'
 import { tx, id } from '@instantdb/react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { FilePlus2, FolderPlus } from 'lucide-react';
+import { FilePlus2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import FileTreeNode from './file-tree-node';
 import FileTreeSkeleton from './file-tree-loading';
-import { Upload } from 'lucide-react';
-import { getFileExtension } from '@/lib/utils/client-utils';
 import { useFrontend } from '@/contexts/FrontendContext';
 
 const FileTree = ({ projectId, query = '' }) => {
@@ -181,66 +179,6 @@ const FileTree = ({ projectId, query = '' }) => {
     }
   }
 
-  const handleUpload = async () => {
-    try {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*,.tex'; // Accept images and .tex files
-      input.multiple = true;
-      input.onchange = async (e) => {
-        const files = Array.from(e.target.files);
-        for (const file of files) {
-          const newFileId = id();
-          const isImage = file.type.startsWith('image/');
-          
-          if (isImage) {
-            // Handle image file
-            const pathname = `images/${newFileId}-${file.name}`;
-            await db.storage.upload(pathname, file);
-            const imageUrl = await db.storage.getDownloadUrl(pathname);
-            
-            const newFile = {
-              id: newFileId,
-              name: file.name,
-              type: 'file',
-              content: imageUrl,
-              parent_id: null,
-              projectId: projectId,
-              isExpanded: null,
-              created_at: new Date(),
-              pathname: file.name,
-              user_id: user.id,
-            };
-            db.transact([tx.files[newFileId].update(newFile)]);
-          } else {
-            // Handle non-image file (e.g., .tex)
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-              const content = event.target.result;
-              const newFile = {
-                id: newFileId,
-                name: file.name,
-                type: 'file',
-                content: content,
-                parent_id: null,
-                projectId: projectId,
-                isExpanded: null,
-                created_at: new Date(),
-                pathname: file.name,
-                user_id: user.id,
-              };
-              db.transact([tx.files[newFileId].update(newFile)]);
-            };
-            reader.readAsText(file);
-          }
-        }
-      };
-      input.click();
-    } catch (error) {
-      console.error('Error uploading files:', error);
-    }
-  };
-
   useEffect(() => {
 
     const resizeObserver = new ResizeObserver(([entry]) => {
@@ -281,22 +219,6 @@ const FileTree = ({ projectId, query = '' }) => {
               </Button>
             </TooltipTrigger>
             <TooltipContent>Add file</TooltipContent>
-          </Tooltip>
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" onClick={() => handleAddItem('folder')}>
-                <FolderPlus className="w-4 h-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Add folder</TooltipContent>
-          </Tooltip>
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" onClick={() => handleUpload()}>
-                <Upload className="w-4 h-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Upload file</TooltipContent>
           </Tooltip>
         </div>
       </div>
