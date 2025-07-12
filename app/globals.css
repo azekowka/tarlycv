@@ -88,18 +88,214 @@ div[class*="instant-devtools"] {
   }
 }
 
-.diff-old-content {
-  background-color: #ffeeee;
-}
-.diff-new-content {
-  background-color: #eeffee;
+/* Original diff styling with higher specificity */
+  .diff-old-content {
+   background-color: #ffeeee;
+  }
+  .diff-new-content {
+   background-color: #eeffee;
+  }
+  
+  .dark .diff-old-content {
+   background-color: #2a1414;
+  }
+  .dark .diff-new-content {
+   background-color: #142a14;
+  }
+  
+  /* Inline diff styling - GitHub style */
+.diff-deleted-text {
+  background-color: rgba(255, 129, 130, 0.4) !important;
+  text-decoration: line-through !important;
+  color: #d1242f !important;
 }
 
-.dark .diff-old-content {
-  background-color: #2a1414;
+.diff-inserted-text {
+  background-color: rgba(46, 160, 67, 0.4) !important;
+  color: #116329 !important;
+  font-weight: 500 !important;
 }
-.dark .diff-new-content {
-  background-color: #142a14;
+
+.diff-selection-border {
+  border: 2px solid #0969da !important;
+  border-radius: 3px !important;
+  background-color: rgba(9, 105, 218, 0.1) !important;
+}
+
+.diff-selection-highlight {
+  background-color: rgba(255, 193, 7, 0.4) !important;
+  border: 2px solid #ffc107 !important;
+  border-radius: 3px !important;
+}
+
+/* Dark mode styling */
+.dark .diff-deleted-text {
+  background-color: rgba(248, 81, 73, 0.25) !important;
+  color: #f85149 !important;
+}
+
+.dark .diff-inserted-text {
+  background-color: rgba(46, 160, 67, 0.25) !important;
+  color: #3fb950 !important;
+}
+
+.dark .diff-selection-border {
+  border: 2px solid #58a6ff !important;
+  background-color: rgba(88, 166, 255, 0.1) !important;
+}
+
+.dark .diff-selection-highlight {
+  background-color: rgba(255, 193, 7, 0.3) !important;
+  border: 2px solid #ffc107 !important;
+}
+
+/* Monaco editor specific styles with maximum specificity */
+.monaco-editor .diff-deleted-text,
+.monaco-editor .view-lines .diff-deleted-text,
+.monaco-editor .view-line .diff-deleted-text {
+  background-color: rgba(255, 129, 130, 0.4) !important;
+  text-decoration: line-through !important;
+  color: #d1242f !important;
+}
+
+.monaco-editor .diff-inserted-text,
+.monaco-editor .view-lines .diff-inserted-text,
+.monaco-editor .view-line .diff-inserted-text {
+  background-color: rgba(46, 160, 67, 0.4) !important;
+  color: #116329 !important;
+  font-weight: 500 !important;
+}
+
+.monaco-editor .diff-selection-border,
+.monaco-editor .view-lines .diff-selection-border,
+.monaco-editor .view-line .diff-selection-border {
+  border: 2px solid #0969da !important;
+  border-radius: 3px !important;
+  background-color: rgba(9, 105, 218, 0.1) !important;
+}
+
+.monaco-editor .diff-selection-highlight,
+.monaco-editor .view-lines .diff-selection-highlight,
+.monaco-editor .view-line .diff-selection-highlight {
+  background-color: rgba(255, 193, 7, 0.4) !important;
+  border: 2px solid #ffc107 !important;
+  border-radius: 3px !important;
+}
+
+/* Override Monaco's hover and selection styles */
+.monaco-editor .view-line:hover .diff-selection-highlight,
+.monaco-editor .view-lines:hover .diff-selection-highlight,
+.monaco-editor .focused .diff-selection-highlight,
+.monaco-editor .view-line.selected .diff-selection-highlight,
+.monaco-editor .view-line.cursor-line .diff-selection-highlight {
+  background-color: rgba(255, 193, 7, 0.4) !important;
+  border: 2px solid #ffc107 !important;
+  border-radius: 3px !important;
+  color: inherit !important;
+}
+
+/* Prevent Monaco from overriding our styles on hover/click */
+.monaco-editor .view-overlays .current-line .diff-selection-highlight,
+.monaco-editor .view-overlays .current-line-margin .diff-selection-highlight {
+  background-color: rgba(255, 193, 7, 0.4) !important;
+  border: 2px solid #ffc107 !important;
+}
+
+.monaco-editor.vs-dark .diff-deleted-text,
+.monaco-editor.vs-dark .view-lines .diff-deleted-text,
+.monaco-editor.vs-dark .view-line .diff-deleted-text {
+  background-color: rgba(248, 81, 73, 0.3) !important;
+  color: #f85149 !important;
+}
+
+.monaco-editor.vs-dark .diff-inserted-text,
+.monaco-editor.vs-dark .view-lines .diff-inserted-text,
+.monaco-editor.vs-dark .view-line .diff-inserted-text {
+  background-color: rgba(46, 160, 67, 0.3) !important;
+  color: #3fb950 !important;
+}
+
+.monaco-editor.vs-dark .diff-selection-border,
+.monaco-editor.vs-dark .view-lines .diff-selection-border,
+.monaco-editor.vs-dark .view-line .diff-selection-border {
+  border: 2px solid #58a6ff !important;
+  background-color: rgba(88, 166, 255, 0.1) !important;
+}
+
+.monaco-editor.vs-dark .diff-selection-highlight,
+.monaco-editor.vs-dark .view-lines .diff-selection-highlight,
+.monaco-editor.vs-dark .view-line .diff-selection-highlight {
+  background-color: rgba(255, 193, 7, 0.3) !important;
+  border: 2px solid #ffc107 !important;
+}
+
+/* Dark mode hover overrides */
+.monaco-editor.vs-dark .view-line:hover .diff-selection-highlight,
+.monaco-editor.vs-dark .view-lines:hover .diff-selection-highlight,
+.monaco-editor.vs-dark .focused .diff-selection-highlight,
+.monaco-editor.vs-dark .view-line.selected .diff-selection-highlight,
+.monaco-editor.vs-dark .view-line.cursor-line .diff-selection-highlight {
+  background-color: rgba(255, 193, 7, 0.3) !important;
+  border: 2px solid #ffc107 !important;
+  border-radius: 3px !important;
+  color: inherit !important;
+}
+
+/* Ultra-specific overrides to prevent ANY white background or disappearing */
+.monaco-editor .view-line .diff-selection-highlight,
+.monaco-editor .view-line:hover .diff-selection-highlight,
+.monaco-editor .view-line.selected .diff-selection-highlight,
+.monaco-editor .view-line.cursor-line .diff-selection-highlight,
+.monaco-editor .view-line.focused .diff-selection-highlight,
+.monaco-editor .view-lines .view-line .diff-selection-highlight,
+.monaco-editor .view-lines .view-line:hover .diff-selection-highlight,
+.monaco-editor .view-lines .view-line.selected .diff-selection-highlight,
+.monaco-editor .view-lines .view-line.cursor-line .diff-selection-highlight,
+.monaco-editor .view-lines .view-line.focused .diff-selection-highlight,
+.monaco-editor.focused .view-line .diff-selection-highlight,
+.monaco-editor.focused .view-line:hover .diff-selection-highlight,
+.monaco-editor.focused .view-line.selected .diff-selection-highlight,
+.monaco-editor.focused .view-line.cursor-line .diff-selection-highlight {
+  background-color: rgba(255, 193, 7, 0.4) !important;
+  background: rgba(255, 193, 7, 0.4) !important;
+  border: 2px solid #ffc107 !important;
+  border-radius: 3px !important;
+  color: inherit !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Dark mode ultra-specific overrides */
+.monaco-editor.vs-dark .view-line .diff-selection-highlight,
+.monaco-editor.vs-dark .view-line:hover .diff-selection-highlight,
+.monaco-editor.vs-dark .view-line.selected .diff-selection-highlight,
+.monaco-editor.vs-dark .view-line.cursor-line .diff-selection-highlight,
+.monaco-editor.vs-dark .view-line.focused .diff-selection-highlight,
+.monaco-editor.vs-dark .view-lines .view-line .diff-selection-highlight,
+.monaco-editor.vs-dark .view-lines .view-line:hover .diff-selection-highlight,
+.monaco-editor.vs-dark .view-lines .view-line.selected .diff-selection-highlight,
+.monaco-editor.vs-dark .view-lines .view-line.cursor-line .diff-selection-highlight,
+.monaco-editor.vs-dark .view-lines .view-line.focused .diff-selection-highlight,
+.monaco-editor.vs-dark.focused .view-line .diff-selection-highlight,
+.monaco-editor.vs-dark.focused .view-line:hover .diff-selection-highlight,
+.monaco-editor.vs-dark.focused .view-line.selected .diff-selection-highlight,
+.monaco-editor.vs-dark.focused .view-line.cursor-line .diff-selection-highlight {
+  background-color: rgba(255, 193, 7, 0.3) !important;
+  background: rgba(255, 193, 7, 0.3) !important;
+  border: 2px solid #ffc107 !important;
+  border-radius: 3px !important;
+  color: inherit !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Override any potential Monaco selection styles */
+.monaco-editor .view-line .diff-selection-highlight * {
+  background-color: transparent !important;
+}
+
+.monaco-editor.vs-dark .view-line .diff-selection-highlight * {
+  background-color: transparent !important;
 }
 
 .tree-overflow {

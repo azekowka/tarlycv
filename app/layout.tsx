@@ -4,7 +4,7 @@ import './globals.css'
 import { FrontendProvider } from '@/contexts/FrontendContext'
 import { ThemeProvider } from '@/components/theme-provider'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { Analytics } from "@vercel/analytics/react"
+
 
 const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
@@ -28,7 +28,6 @@ export default function RootLayout({
             <FrontendProvider>
               <div className="hidden md:block">
                 {children}
-                <Analytics />
               </div>
             </FrontendProvider>
           </TooltipProvider>

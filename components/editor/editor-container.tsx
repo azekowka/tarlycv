@@ -1,7 +1,12 @@
 'use client'
 
 import React, { useState, useCallback, useEffect, useRef } from 'react'
-import { CodeEditor } from './editor'
+import dynamic from 'next/dynamic'
+
+const CodeEditor = dynamic(() => import('./editor').then(mod => ({ default: mod.CodeEditor })), {
+  ssr: false,
+  loading: () => <div className="flex-grow flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>
+})
 import { Button } from '@/components/ui/button'
 import { useTheme } from 'next-themes'
 import { db } from '@/lib/constants'
@@ -13,9 +18,6 @@ import ImageViewer from './image-viewer'
 import { MousePointer2 } from 'lucide-react'
 import { Command } from 'lucide-react' // Add this import for the Command icon
 
-
-const isMac = navigator.userAgent.includes('Macintosh');
-
 const EditorContainer = () => {
   const { theme, systemTheme } = useTheme()
   const [localContent, setLocalContent] = useState('')
@@ -24,9 +26,14 @@ const EditorContainer = () => {
   const [isStreaming,setIsStreaming] = useState(false);
   const isStreamingRef = useRef(false);
   const fileType = getFileExtension(currentlyOpen?.name || '');
+  const [isMac, setIsMac] = useState(false);
   
 
   const isImageFile = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(fileType.toLowerCase());
+
+  useEffect(() => {
+    setIsMac(navigator.userAgent.includes('Macintosh'));
+  }, []);
 
   useEffect(() => {
     if (currentlyOpen && currentlyOpen.id !== openFile?.id) {

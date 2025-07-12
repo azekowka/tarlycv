@@ -54,6 +54,12 @@ export async function fetchPdf(files: EditorFiles[]) {
         throw new Error(`${errorData.error}: ${errorData.message}\n\nDetails: ${errorData.details}`);
     }
 
+    console.log('=== DEBUG: LaTeX Content Being Sent ===');
+    console.log('Main file name:', mainFile.name);
+    console.log('Main file content:');
+    console.log(mainFile.content);
+    console.log('=== END DEBUG ===');
+
     const formData = new FormData();
     
     for (const file of files) {

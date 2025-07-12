@@ -17,28 +17,43 @@ export const useAIAssist = () => {
     editor.addCommand(
       monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyK,
       async () => {
+        console.log('⌨️ Ctrl+K pressed - AI Assist triggered!');
         const selection = editor.getSelection();
         const model = editor.getModel();
-        if (!model || !selection) return;
+        if (!model || !selection) {
+          console.log('❌ No model or selection found');
+          return;
+        }
 
         const oldText = model.getValueInRange(selection);
+        console.log('📋 Selected text:', oldText.substring(0, 100) + (oldText.length > 100 ? '...' : ''));
+        
         const userInput = await promptModal(editor, monacoInstance, selection);
-        if (!userInput) return;
+        if (!userInput) {
+          console.log('❌ User cancelled or no input provided');
+          return;
+        }
+        
+        console.log('💬 User request:', userInput);
 
         setIsStreaming(true);
+        console.log('🔄 Calling generate function...');
         const { output } = await generate(
           `Selected text to modify:\n${oldText}\n\nUser request: ${userInput}\n\nPlease provide ONLY the modified version of the selected text.`
         );
 
         let newText = '';
+        console.log('📡 Reading stream response...');
         for await (const delta of readStreamableValue(output)) {
           if (delta?.content) {
             newText += delta.content;
           }
         }
         setIsStreaming(false);
+        console.log('✅ AI response complete. New text length:', newText.length);
 
         if (newText.trim()) {
+          console.log('🎨 Creating diff visualization...');
           const { diffText, decorations, currentLine } = calculateDiff(
             oldText,
             newText,
@@ -57,6 +72,8 @@ export const useAIAssist = () => {
             currentLine,
             oldDecorations
           );
+          
+          console.log('🎯 Content widget created and added to editor');
           
           editor.addContentWidget(contentWidget);
           
