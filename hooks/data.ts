@@ -1,7 +1,7 @@
 import { db } from '@/lib/constants'
 import { tx } from '@instantdb/react'
 
-export function useProjectData(projectId: string, userId: string) {
+export function useProjectData(projectId: string, userId: string | null | undefined) {
   return db.useQuery({
     projects: {
       $: {
@@ -14,7 +14,7 @@ export function useProjectData(projectId: string, userId: string) {
   })
 }
 
-export function useProjectFiles(projectId: string, userId: string) {
+export function useProjectFiles(projectId: string, userId: string | null | undefined) {
   return db.useQuery({
     files: {
       $: {

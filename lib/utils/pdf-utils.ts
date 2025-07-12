@@ -41,8 +41,8 @@ interface EditorFiles {
   [key: string]: any;
 }
 
-export async function fetchPdf(files: EditorFiles) {
-    if (!files.some((file: EditorFiles) => file.name === 'main.tex')) {
+export async function fetchPdf(files: EditorFiles[]) {
+    if (!files.some((file) => file.name === 'main.tex')) {
         const errorData = {
             error: 'Missing File',
             message: 'No main.tex file found',
@@ -54,7 +54,8 @@ export async function fetchPdf(files: EditorFiles) {
 
     const formData = new FormData();
     
-    await Promise.all(files.map(async (file: EditorFiles) => {
+    // Use a sequential loop to avoid race conditions
+    for (const file of files) {
         if (file.type === 'file') {
             const extension = file.name.split('.').pop()?.toLowerCase();
             let mimeType: string;
@@ -74,32 +75,42 @@ export async function fetchPdf(files: EditorFiles) {
                     mimeType = 'image/svg+xml';
                     break;
                 default:
-                    throw new Error(`Unsupported file type: ${extension}`);
+                    // Skip unsupported files
+                    continue;
             }
 
             const pathname = file.pathname;
 
             let blob: Blob;
             if (extension !== 'tex' && typeof file.content === 'string') {
-                // For images, file.content is a URL
                 const response = await fetch(file.content);
                 blob = await response.blob();
             } else {
-                // For .tex files, create blob from content
                 blob = new Blob([file.content], { type: mimeType });
             }
-            formData.append(pathname, blob);
+            formData.append(pathname, blob, pathname);
         }
-    }));
+    }
 
-    const response = await fetch(RAILWAY_ENDPOINT_URL, {
-        method: 'POST',
-        body: formData,
-    });
+    let response;
+    try {
+        response = await fetch(RAILWAY_ENDPOINT_URL, {
+            method: 'POST',
+            body: formData,
+        });
+    } catch (networkError) {
+        console.error("Network error during fetch to Railway:", networkError);
+        throw networkError;
+    }
 
     if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`${errorData.error}: ${errorData.message}\n\nDetails: ${errorData.details}`);
+        const errorText = await response.text();
+        console.error("--- RAW ERROR FROM SERVER ---");
+        console.error(`Status: ${response.status} ${response.statusText}`);
+        console.error("Response Body:", errorText);
+        console.error("-----------------------------");
+        // Throw a new, informative error
+        throw new Error(`Server responded with status ${response.status}: ${errorText}`);
     }
     
     return response.blob();

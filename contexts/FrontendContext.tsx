@@ -17,8 +17,8 @@ interface FrontendContextType {
   db: any; // Consider defining a more specific type for your db instance
   isLoading: boolean;
   error: any;
-  projects: any[]; // Define a more specific type for projects
-  fetchProjects: () => void;
+  // projects: any[]; // Define a more specific type for projects
+  // fetchProjects: () => void;
   // TODO: remove this and let projects be fetched by id
   currentProject: any;
   setCurrentProject: (project: any) => void;
@@ -35,7 +35,7 @@ export const FrontendProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<any | null>(null);
   const [auth, setAuth] = useState<any | null>(null);
-  const [projects, setProjects] = useState<any[]>([]);
+  // const [projects, setProjects] = useState<any[]>([]); // This will be removed
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<any>(null);
   const [currentProject, setCurrentProject] = useState<any>(null);
@@ -45,23 +45,6 @@ export const FrontendProvider: React.FC<{ children: React.ReactNode }> = ({
       return instantDb;
     }
   }, []);
-
-  const fetchProjects = async () => {
-    if (!db || !user) return;
-    setIsLoading(true);
-    try {
-      const projectsData = await db
-        .find('projects')
-        .where('user_id', '==', user.id)
-        .do();
-      setProjects(projectsData);
-    } catch (err) {
-      console.error('Failed to fetch projects:', err);
-      setError(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   useEffect(() => {
     const mockUser = {
@@ -75,13 +58,7 @@ export const FrontendProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => {
       // Cleanup if needed
     };
-  }, [db]);
-
-  useEffect(() => {
-    if (user && db) {
-      fetchProjects();
-    }
-  }, [user, db]);
+  }, []);
 
   const value = {
     user,
@@ -89,8 +66,8 @@ export const FrontendProvider: React.FC<{ children: React.ReactNode }> = ({
     db,
     isLoading,
     error,
-    projects,
-    fetchProjects,
+    // projects, // This will be removed
+    // fetchProjects, // This will be removed
     currentProject,
     setCurrentProject,
   };

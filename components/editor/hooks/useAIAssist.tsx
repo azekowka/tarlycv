@@ -1,62 +1,80 @@
-'use client'
-import { useState } from 'react'
-import { generate } from '@/app/actions'
-import { readStreamableValue } from 'ai/rsc'
-import { calculateDiff } from '../utils/calculateDiff'
-import { createContentWidget } from '../utils/WidgetCreator'
-import { promptModal } from '../utils/promptModal'
-import { applyEdit } from '../utils/applyEdit'
-import * as monaco from 'monaco-editor'
-import type { editor } from 'monaco-editor'
+'use client';
+
+import { generate } from '@/app/actions';
+import { readStreamableValue } from 'ai/rsc';
+import { calculateDiff } from '../utils/calculateDiff';
+import { createContentWidget } from '../utils/WidgetCreator';
+import { promptModal } from '../utils/promptModal';
+import * as monaco from 'monaco-editor';
+import type { editor } from 'monaco-editor';
 
 export const useAIAssist = () => {
-  const handleAIAssist = (editor: editor.IStandaloneCodeEditor, monacoInstance: typeof monaco, setIsStreaming: (isStreaming: boolean) => void) => {
-    editor.addCommand(monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyK, async () => {
-      const selection = editor.getSelection()
-      const model = editor.getModel()
-      if (!model || !selection) return
-      const initialText = model.getValue()
-      const range = new monaco.Range(
-        selection.startLineNumber,
-        selection.startColumn,
-        selection.endLineNumber,
-        selection.endColumn
-      )
+  const handleAIAssist = (
+    editor: editor.IStandaloneCodeEditor,
+    monacoInstance: typeof monaco,
+    setIsStreaming: (isStreaming: boolean) => void
+  ) => {
+    editor.addCommand(
+      monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyK,
+      async () => {
+        const selection = editor.getSelection();
+        const model = editor.getModel();
+        if (!model || !selection) return;
 
-      const oldText = model.getValueInRange(range)
-      const userInput = await promptModal(editor, monacoInstance, selection)
+        const oldText = model.getValueInRange(selection);
+        const userInput = await promptModal(editor, monacoInstance, selection);
+        if (!userInput) return;
 
-      // Only send the selected text as context, not the entire file
-      const { output } = await generate(
-        `Selected text to modify:\n${oldText}\n\nUser request: ${userInput}\n\nPlease provide ONLY the modified version of the selected text. Do not include any other parts of the document.`
-      )
+        setIsStreaming(true);
+        const { output } = await generate(
+          `Selected text to modify:\n${oldText}\n\nUser request: ${userInput}\n\nPlease provide ONLY the modified version of the selected text.`
+        );
 
-      let newText = ''
-      setIsStreaming(true)
+        let newText = '';
+        for await (const delta of readStreamableValue(output)) {
+          if (delta?.content) {
+            newText += delta.content;
+          }
+        }
+        setIsStreaming(false);
 
-      // Collect all streamed content first, don't apply edits during streaming
-      for await (const delta of readStreamableValue(output)) {
-        if (!delta) continue
-        newText += delta.content
-      }
+        if (newText.trim()) {
+          const { diffText, decorations, currentLine } = calculateDiff(
+            oldText,
+            newText,
+            monacoInstance,
+            selection
+          );
 
-      setIsStreaming(false)
-      
-      // Only apply the edit once when streaming is complete
-      if (newText.trim()) {
-        model.pushEditOperations(
-          [],
-          [
+          const oldDecorations = editor.deltaDecorations([], decorations);
+          
+          const contentWidget = createContentWidget(
+            editor,
+            monacoInstance,
+            selection,
+            oldText,
+            newText.trim(),
+            currentLine,
+            oldDecorations
+          );
+          
+          editor.addContentWidget(contentWidget);
+          
+          editor.executeEdits('ai-assist', [
             {
-              range: range,
-              text: newText.trim(),
+              range: new monacoInstance.Range(
+                selection.startLineNumber,
+                1,
+                selection.endLineNumber,
+                model.getLineMaxColumn(selection.endLineNumber)
+              ),
+              text: diffText,
             },
-          ],
-          () => null
-        )
+          ]);
+        }
       }
-    })
-  }
+    );
+  };
 
-  return { handleAIAssist }
-}
+  return { handleAIAssist };
+};

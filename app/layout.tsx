@@ -8,8 +8,8 @@ import { Analytics } from "@vercel/analytics/react"
 
 const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
-  title: 'Jules',
-  description: 'AI LaTeX Editor',
+  title: 'Tarly CV',
+  description: 'Cursor for Resumes',
   icons: {
     icon: '/favicon.ico',
   },

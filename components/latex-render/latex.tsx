@@ -47,10 +47,11 @@ function LatexRenderer() {
     setError(null)
     setIsDocumentReady(false)
     try {
+      console.log("Files being sent to fetchPdf:", JSON.stringify(files, null, 2));
       const blob = await fetchPdf(files);
-      const pathname = createPathname(user.id, projectId)
-      await savePdfToStorage(blob, pathname + 'main.pdf', projectId)
-      await savePreviewToStorage(blob, pathname + 'preview.webp', projectId)
+      // const pathname = createPathname(user.id, projectId)
+      // await savePdfToStorage(blob, pathname + 'main.pdf', projectId)
+      // await savePreviewToStorage(blob, pathname + 'preview.webp', projectId)
       const url = URL.createObjectURL(blob)
       setPdfUrl(url)
     } catch (error) {
