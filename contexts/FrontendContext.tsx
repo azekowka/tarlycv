@@ -6,7 +6,6 @@ import React, {
   useEffect,
   useMemo,
   useContext,
-  Dispatch,
 } from 'react';
 import { db as instantDb } from '@/lib/constants';
 

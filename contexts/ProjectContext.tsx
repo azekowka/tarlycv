@@ -2,8 +2,6 @@
 import React, { createContext, useContext, ReactNode, useState } from 'react'
 import { useProjectData, useProjectFiles } from '@/hooks/data';
 import { useFrontend } from '@/contexts/FrontendContext';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 
 // TODO: Add better types
 interface ProjectContextType {

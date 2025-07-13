@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { File, Folder, FolderOpen, ChevronRight, ChevronDown, Edit, Trash2, FilePlus2, FolderPlus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Tex from '@/public/tex'

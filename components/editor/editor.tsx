@@ -3,7 +3,6 @@ import Editor from '@monaco-editor/react'
 import { useEditorSetup } from './hooks/useEditorSetup'
 import { useAIAssist } from './hooks/useAIAssist'
 import { editorDefaultOptions } from './constants/editorDefaults'
-import { Loader2 } from 'lucide-react'
 
 interface CodeEditorProps {
   onChange: (value: string) => void
