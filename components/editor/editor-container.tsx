@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { db } from '@/lib/constants'
 import { tx } from '@instantdb/react'
 import { Command } from 'lucide-react'
+import { AILoadingOverlay } from './ai-loading-overlay'
 
 const getFileExtension = (fileName: string): string => {
   const parts = fileName.split('.')
@@ -86,57 +87,60 @@ const EditorContainer = () => {
   }
 
   return (
-    <div className="flex flex-col w-full h-full">
-      <div className="flex justify-between w-full items-center border-b shadow-sm p-2">
-        <div className="flex items-center border space-x-2 px-3 h-9 rounded-md text-sm text-muted-foreground">
-          {isMac ? (
-            <>
-              <Command className="h-4 w-4" />
-              <kbd className="px-1.5 py-0.5 text-xs font-semibold text-muted-foreground bg-background/50 border rounded">⇧</kbd>
-              <kbd className="px-1.5 py-0.5 text-xs font-semibold text-muted-foreground bg-background/50 border rounded">F</kbd>
-            </>
-          ) : (
-            <kbd className="px-1.5 py-0.5 text-xs font-semibold text-muted-foreground bg-background border rounded">Ctrl+Shift+F</kbd>
-          )}
-          <span>to Fix Document</span>
-        </div>
-        
-        <div className="flex items-center border space-x-2 px-3 h-9 rounded-md text-sm text-muted-foreground">
-          <span>Select and</span>
-          {isMac ? (
-            <>
-              <Command className="h-4 w-4" />
-              <kbd className="px-1.5 py-0.5 text-xs font-semibold text-muted-foreground bg-background/50 border rounded">K</kbd>
-            </>
-          ) : (
-            <kbd className="px-1.5 py-0.5 text-xs font-semibold text-muted-foreground bg-background border rounded">Ctrl+K</kbd>
-          )}
-          <span>for AI Autocomplete</span>
-        </div>
-      </div>
-      {!currentlyOpen ? (
-        <div className="flex-grow flex items-center justify-center text-muted-foreground">
-          No file open
-        </div>
-      ) : isImageFile ? (
-        <div className="flex-grow flex items-center justify-center bg-background">
-          <div className="relative w-full h-full" style={{
-            backgroundImage: `
-              linear-gradient(to right, hsl(var(--border) / 0.5) 1px, transparent 1px),
-              linear-gradient(to bottom, hsl(var(--border) / 0.5) 1px, transparent 1px)
-            `,
-            backgroundSize: '20px 20px'
-          }}>
-            <ImageViewer
-              src={currentlyOpen?.content || ''}
-              alt={currentlyOpen?.name || 'Image'}
-            />
+    <>
+      <div className="flex flex-col w-full h-full">
+        <div className="flex justify-between w-full items-center border-b shadow-sm p-2">
+          <div className="flex items-center border space-x-2 px-3 h-9 rounded-md text-sm text-muted-foreground">
+            {isMac ? (
+              <>
+                <Command className="h-4 w-4" />
+                <kbd className="px-1.5 py-0.5 text-xs font-semibold text-muted-foreground bg-background/50 border rounded">⇧</kbd>
+                <kbd className="px-1.5 py-0.5 text-xs font-semibold text-muted-foreground bg-background/50 border rounded">F</kbd>
+              </>
+            ) : (
+              <kbd className="px-1.5 py-0.5 text-xs font-semibold text-muted-foreground bg-background border rounded">Ctrl+Shift+F</kbd>
+            )}
+            <span>to Fix Document</span>
+          </div>
+          
+          <div className="flex items-center border space-x-2 px-3 h-9 rounded-md text-sm text-muted-foreground">
+            <span>Select and</span>
+            {isMac ? (
+              <>
+                <Command className="h-4 w-4" />
+                <kbd className="px-1.5 py-0.5 text-xs font-semibold text-muted-foreground bg-background/50 border rounded">K</kbd>
+              </>
+            ) : (
+              <kbd className="px-1.5 py-0.5 text-xs font-semibold text-muted-foreground bg-background border rounded">Ctrl+K</kbd>
+            )}
+            <span>for AI Autocomplete</span>
           </div>
         </div>
-      ) : (
-        <CodeEditor onChange={handleCodeChange} setIsStreaming={handleIsStreamingChange} value={localContent} key={`${theme || systemTheme}-${openFile?.id}`} />
-      )}
-    </div>
+        {!currentlyOpen ? (
+          <div className="flex-grow flex items-center justify-center text-muted-foreground">
+            No file open
+          </div>
+        ) : isImageFile ? (
+          <div className="flex-grow flex items-center justify-center bg-background">
+            <div className="relative w-full h-full" style={{
+              backgroundImage: `
+                linear-gradient(to right, hsl(var(--border) / 0.5) 1px, transparent 1px),
+                linear-gradient(to bottom, hsl(var(--border) / 0.5) 1px, transparent 1px)
+              `,
+              backgroundSize: '20px 20px'
+            }}>
+              <ImageViewer
+                src={currentlyOpen?.content || ''}
+                alt={currentlyOpen?.name || 'Image'}
+              />
+            </div>
+          </div>
+        ) : (
+          <CodeEditor onChange={handleCodeChange} setIsStreaming={handleIsStreamingChange} value={localContent} key={`${theme || systemTheme}-${openFile?.id}`} />
+        )}
+      </div>
+      <AILoadingOverlay isVisible={isStreaming} message="AI is processing your request..." />
+    </>
   )
 }
 

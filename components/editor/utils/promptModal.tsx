@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import * as monaco from 'monaco-editor'
 import { PromptInputBox } from '../ui/prompt-box'
+import { AILoadingOverlay } from '../ai-loading-overlay'
 
 export const promptModal = async (
   editor: monaco.editor.IStandaloneCodeEditor,

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { fixLatexDocumentFromError } from '@/app/actions'
 import { useProject } from '@/contexts/ProjectContext'
+import { AILoadingOverlay } from '@/components/editor/ai-loading-overlay'
 
 function parseLatexError(error: string): string {
   const errorMessages: { [key: string]: string } = {
@@ -94,6 +95,7 @@ export default function LatexError({ error }: { error: string }) {
           </div>
         </details>
       </AlertDescription>
+      <AILoadingOverlay isVisible={isFixing} message="AI is fixing your LaTeX document..." />
     </Alert>
   )
 }
