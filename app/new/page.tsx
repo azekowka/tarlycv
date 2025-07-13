@@ -15,12 +15,7 @@ import { templateContent } from '@/lib/constants/templates'
 import { useFrontend } from '@/contexts/FrontendContext'
 
 const templates = [
-  { id: 'blank', title: 'Blank', image: '/blank_preview.webp' },
-  { id: 'article', title: 'Article', image: '/article_preview.webp' },
-  { id: 'report', title: 'Report', image: '/report_preview.webp' },
   { id: 'resume', title: 'Resume', image: '/resume_preview.webp' },
-  { id: 'letter', title: 'Letter', image: '/letter_preview.webp' },
-  { id: 'proposal', title: 'Proposal', image: '/proposal_preview.webp' },
 ]
 
 type TemplateKey = keyof typeof templateContent
@@ -29,7 +24,7 @@ export default function NewDocument() {
   const { user } = useFrontend()
   const router = useRouter()
   const [title, setTitle] = useState('New Document')
-  const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>('blank')
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>('resume')
   const [titleError, setTitleError] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
