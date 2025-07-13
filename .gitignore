@@ -8,7 +8,7 @@
 .env
 # testing
 /coverage
-
+/resumetex-nextjs
 # next.js
 /.next/
 /out/

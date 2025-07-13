@@ -10,7 +10,7 @@ import FileTreeNode from './file-tree-node';
 import FileTreeSkeleton from './file-tree-loading';
 import { useFrontend } from '@/contexts/FrontendContext';
 
-const FileTree = ({ projectId, query = '' }) => {
+const FileTree = ({ projectId, query = '', onOpenCreateDialog }) => {
   const { user } = useFrontend()
   const {
     data: filesData,
@@ -105,6 +105,16 @@ const FileTree = ({ projectId, query = '' }) => {
     },
     [projectId, filesData]
   )
+
+  const handleAddFile = useCallback(() => {
+    if (onOpenCreateDialog) {
+      // Open the CreateResumeDialog
+      onOpenCreateDialog()
+    } else {
+      // Fallback to the original behavior
+      handleAddItem('file')
+    }
+  }, [onOpenCreateDialog, handleAddItem])
 
   const handleRename = useCallback(({ id, name }) => {
     const file = filesData.files.find((file) => file.id === id)
@@ -226,7 +236,7 @@ const FileTree = ({ projectId, query = '' }) => {
         <div className="flex items-center">
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" onClick={() => handleAddItem('file')}>
+              <Button variant="ghost" size="sm" onClick={handleAddFile}>
                 <FilePlus2 className="w-4 h-4" />
               </Button>
             </TooltipTrigger>

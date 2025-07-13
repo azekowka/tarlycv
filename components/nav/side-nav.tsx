@@ -7,7 +7,11 @@ import { Search } from 'lucide-react'
 import LoadingSideNav from '@/components/nav/loading-side-nav'
 import { useProject } from '@/contexts/ProjectContext'
 
-export default function SideNav() {
+interface SideNavProps {
+  onOpenCreateDialog?: () => void;
+}
+
+export default function SideNav({ onOpenCreateDialog }: SideNavProps) {
   const { project, isProjectLoading, projectId } = useProject();
   const projectTitle = project?.title
   const [query, setQuery] = useState('')
@@ -26,7 +30,7 @@ export default function SideNav() {
         <Input placeholder="Search resumes..." className="flex-grow pl-10" value={query} onChange={(e) => setQuery(e.target.value)} />
       </div>
       <div className="flex-grow overflow-auto">
-        <FileTree projectId={projectId} query={query} />
+        <FileTree projectId={projectId} query={query} onOpenCreateDialog={onOpenCreateDialog} />
       </div>
 
     </div>
