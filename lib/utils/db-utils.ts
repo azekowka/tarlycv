@@ -53,7 +53,3 @@ export async function savePreviewToStorage(blob: Blob, pathname: string, project
     })
   ])
 }
-
-export async function deleteFileFromStorage(pathname: string): Promise<void> {
-  await db.storage.delete(pathname)
-}
