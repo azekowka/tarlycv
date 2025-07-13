@@ -7,11 +7,19 @@ import EditorContainer from '@/components/editor/editor-container'
 import { ProjectProvider } from '@/contexts/ProjectContext'
 import { useParams } from 'next/navigation'
 import { useFrontend } from '@/contexts/FrontendContext'
+import { useState, useEffect } from 'react'
 export const maxDuration = 30
 
 export default function Home() {
   const { id } = useParams<{ id: string }>()
-  const sideNavSize = typeof window !== 'undefined' ? (window.innerWidth < 1440 ? 20 : 16) : 16
+  const [sideNavSize, setSideNavSize] = useState(20) // Default size for SSR
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    // Set client-specific sizes after hydration
+    setIsClient(true)
+    setSideNavSize(window.innerWidth < 1440 ? 20 : 16)
+  }, [])
 
   return (
     <ProjectProvider projectId={id}>
@@ -21,11 +29,11 @@ export default function Home() {
             <SideNav />
           </ResizablePanel>
           <ResizableHandle />
-          <ResizablePanel defaultSize={44}>
+          <ResizablePanel defaultSize={40}>
             <EditorContainer />
           </ResizablePanel>
           <ResizableHandle />
-          <ResizablePanel defaultSize={44}>
+          <ResizablePanel defaultSize={40}>
             <LatexRenderer />
           </ResizablePanel>
         </ResizablePanelGroup>

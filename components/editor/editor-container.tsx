@@ -1,28 +1,28 @@
 'use client'
 
-import React, { useState, useCallback, useEffect, useRef } from 'react'
-import dynamic from 'next/dynamic'
-
-const CodeEditor = dynamic(() => import('./editor').then(mod => ({ default: mod.CodeEditor })), {
-  ssr: false,
-  loading: () => <div className="flex-grow flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>
-})
-import { Button } from '@/components/ui/button'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useTheme } from 'next-themes'
+import { CodeEditor } from './editor'
+import { useProject } from '@/contexts/ProjectContext'
+import ImageViewer from './image-viewer'
+import { Skeleton } from '@/components/ui/skeleton'
 import { db } from '@/lib/constants'
 import { tx } from '@instantdb/react'
-import { Skeleton } from '@/components/ui/skeleton'
-import { useProject } from '@/contexts/ProjectContext'
-import { getFileExtension } from '@/lib/utils/client-utils';
-import ImageViewer from './image-viewer'
-import { MousePointer2 } from 'lucide-react'
-import { Command } from 'lucide-react' // Add this import for the Command icon
+import { Command } from 'lucide-react'
+
+const getFileExtension = (fileName: string): string => {
+  const parts = fileName.split('.')
+  if (parts.length > 1) {
+    return parts[parts.length - 1]
+  }
+  return ''
+}
 
 const EditorContainer = () => {
   const { theme, systemTheme } = useTheme()
   const [localContent, setLocalContent] = useState('')
   const [openFile, setOpenFile] = useState<any>(null)
-  const { currentlyOpen, isFilesLoading, isProjectLoading } = useProject();
+  const { currentlyOpen, isFilesLoading, isProjectLoading, setUpdateDocument } = useProject();
   const [isStreaming,setIsStreaming] = useState(false);
   const isStreamingRef = useRef(false);
   const fileType = getFileExtension(currentlyOpen?.name || '');
@@ -41,6 +41,23 @@ const EditorContainer = () => {
       setLocalContent(currentlyOpen.content)
     }
   }, [currentlyOpen?.id])
+
+  // Register document update function in context
+  useEffect(() => {
+    if (setUpdateDocument && openFile) {
+      const updateDocumentFunction = (newContent: string) => {
+        console.log('📝 Updating document content via context...');
+        setLocalContent(newContent);
+        db.transact([tx.files[openFile.id].update({ content: newContent })]);
+        console.log('✅ Document updated successfully');
+      };
+      
+      setUpdateDocument(() => updateDocumentFunction);
+      
+      // Cleanup function
+      return () => setUpdateDocument(undefined);
+    }
+  }, [setUpdateDocument, openFile]);
   
   const handleCodeChange = useCallback(
     (newCode: string) => {
@@ -70,7 +87,20 @@ const EditorContainer = () => {
 
   return (
     <div className="flex flex-col w-full h-full">
-      <div className="flex justify-end w-full items-center border-b shadow-sm p-2">
+      <div className="flex justify-between w-full items-center border-b shadow-sm p-2">
+        <div className="flex items-center border space-x-2 px-3 h-9 rounded-md text-sm text-muted-foreground">
+          {isMac ? (
+            <>
+              <Command className="h-4 w-4" />
+              <kbd className="px-1.5 py-0.5 text-xs font-semibold text-muted-foreground bg-background/50 border rounded">⇧</kbd>
+              <kbd className="px-1.5 py-0.5 text-xs font-semibold text-muted-foreground bg-background/50 border rounded">F</kbd>
+            </>
+          ) : (
+            <kbd className="px-1.5 py-0.5 text-xs font-semibold text-muted-foreground bg-background border rounded">Ctrl+Shift+F</kbd>
+          )}
+          <span>to Fix Document</span>
+        </div>
+        
         <div className="flex items-center border space-x-2 px-3 h-9 rounded-md text-sm text-muted-foreground">
           <span>Select and</span>
           {isMac ? (
