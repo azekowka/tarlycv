@@ -7,7 +7,6 @@ import { createContentWidget } from '../utils/WidgetCreator';
 import { promptModal } from '../utils/promptModal';
 import * as monaco from 'monaco-editor';
 import type { editor } from 'monaco-editor';
-import { fixLatexDocument } from '@/app/actions';
 
 // Client-side LaTeX validation function
 function validateLatexOnClient(text: string): { isValid: boolean; errors: string[] } {
@@ -67,65 +66,7 @@ function validateLatexOnClient(text: string): { isValid: boolean; errors: string
   return { isValid: errors.length === 0, errors };
 }
 
-// Function to fix LaTeX document structure
-export const fixDocumentStructure = async (
-  editor: editor.IStandaloneCodeEditor,
-  monacoInstance: typeof monaco
-) => {
-  console.log('🔧 Starting document structure fix...');
-  
-  try {
-    const currentContent = editor.getValue();
-    console.log('📄 Current document length:', currentContent.length);
-    
-    // Call the server action to fix the document
-    const result = await fixLatexDocument(currentContent);
-    
-    if (result.wasFixed) {
-      console.log('✅ Document structure fixed!');
-      console.log('📋 Changes made:', result.changes);
-      
-      // Update the editor with the fixed content
-      editor.setValue(result.fixedContent);
-      
-      // Show success message
-      console.log('🎉 Document structure has been automatically repaired!');
-      
-      return {
-        success: true,
-        message: 'Document structure fixed successfully!',
-        changes: result.changes,
-        validation: result.validation
-      };
-    } else {
-      console.log('ℹ️ Document structure is already correct');
-      
-      return {
-        success: true,
-        message: 'Document structure is already correct',
-        changes: 'No changes needed',
-        validation: result.validation
-      };
-    }
-  } catch (error) {
-    console.error('❌ Error fixing document structure:', error);
-    
-    return {
-      success: false,
-      message: 'Failed to fix document structure',
-      error: error instanceof Error ? error.message : String(error)
-    };
-  }
-};
-
 export const useAIAssist = () => {
-  const handleDocumentFix = async (
-    editor: editor.IStandaloneCodeEditor,
-    monacoInstance: typeof monaco
-  ) => {
-    return await fixDocumentStructure(editor, monacoInstance);
-  };
-
   const handleAIAssist = (
     editor: editor.IStandaloneCodeEditor,
     monacoInstance: typeof monaco,
@@ -292,82 +233,7 @@ export const useAIAssist = () => {
         }
       }
     );
-
-    // Add Ctrl+Shift+F command for document structure fix
-    editor.addCommand(
-      monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyMod.Shift | monacoInstance.KeyCode.KeyF,
-      async () => {
-        console.log('⌨️ Ctrl+Shift+F pressed - Document structure fix triggered!');
-        try {
-          const result = await handleDocumentFix(editor, monacoInstance);
-          
-          // Show success/info message to user
-          const isSuccess = result.success;
-          const messageDiv = document.createElement('div');
-          messageDiv.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${isSuccess ? '#059669' : '#dc2626'};
-            color: white;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 12px;
-            z-index: 10000;
-            max-width: 400px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          `;
-          messageDiv.innerHTML = `
-            <div style="font-weight: bold; margin-bottom: 8px;">${isSuccess ? '✅' : '❌'} Document Fix</div>
-            <div style="white-space: pre-line; line-height: 1.4;">${result.message}</div>
-            ${result.changes ? `<div style="margin-top: 8px; font-size: 11px; opacity: 0.9;">${result.changes}</div>` : ''}
-          `;
-          
-          document.body.appendChild(messageDiv);
-          
-          // Auto-remove after 5 seconds
-          setTimeout(() => {
-            if (messageDiv.parentNode) {
-              messageDiv.parentNode.removeChild(messageDiv);
-            }
-          }, 5000);
-          
-        } catch (error) {
-          console.error('❌ Error in document fix:', error);
-          
-          // Show error message
-          const errorDiv = document.createElement('div');
-          errorDiv.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #dc2626;
-            color: white;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 12px;
-            z-index: 10000;
-            max-width: 400px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          `;
-          errorDiv.innerHTML = `
-            <div style="font-weight: bold; margin-bottom: 8px;">❌ Document Fix Error</div>
-            <div style="white-space: pre-line; line-height: 1.4;">${error instanceof Error ? error.message : 'Unknown error occurred'}</div>
-          `;
-          
-          document.body.appendChild(errorDiv);
-          
-          setTimeout(() => {
-            if (errorDiv.parentNode) {
-              errorDiv.parentNode.removeChild(errorDiv);
-            }
-          }, 8000);
-        }
-      }
-    );
   };
 
-  return { handleAIAssist, handleDocumentFix };
+  return { handleAIAssist };
 };

@@ -25,7 +25,7 @@ interface FrontendContextType {
 }
 
 // Create the context with a default value
-export const FrontendContext = createContext<FrontendContextType | undefined>(
+const FrontendContext = createContext<FrontendContextType | undefined>(
   undefined
 );
 

@@ -126,8 +126,3 @@ export async function fetchPdf(files: EditorFiles[]) {
     
     return response.blob();
 }
-
-
-export function containsMainTex(files: File[]): boolean {
-  return files.some(file => file.name === 'main.tex');
-}

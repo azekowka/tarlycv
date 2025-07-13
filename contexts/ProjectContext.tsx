@@ -15,7 +15,7 @@ interface ProjectContextType {
   setUpdateDocument?: (fn: (newContent: string) => void) => void
 }
 
-export const ProjectContext = createContext<any>(undefined)
+const ProjectContext = createContext<any>(undefined)
 
 export function ProjectProvider({ children, projectId }: { children: ReactNode; projectId: string }) {
   const { user, isLoading: isUserLoading } = useFrontend();

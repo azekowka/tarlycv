@@ -34,5 +34,3 @@ export const CodeEditor = ({ onChange, value, setIsStreaming }: CodeEditorProps)
     />
   )
 }
-
-export default CodeEditor

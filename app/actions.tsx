@@ -365,68 +365,6 @@ export async function generate(input: string) {
 }
 
 // Server action to fix LaTeX document structure
-export async function fixLatexDocument(latexContent: string) {
-  console.log('🔧 FIXING LATEX DOCUMENT STRUCTURE');
-  console.log('📝 Original content length:', latexContent.length);
-  
-  let fixedContent = autoFixLatexStructure(latexContent);
-  
-  // Additional comprehensive fixes for common resume issues
-  console.log('🔍 Applying comprehensive document fixes...');
-  
-  // Fix: Missing Experience section completely
-  if (!fixedContent.includes('\\section{Experience}') && fixedContent.includes('\\resumeSubheading')) {
-    console.log('🔧 Adding completely missing Experience section');
-    
-    // Find the end of the header/contact info (after \end{center} or before first \resumeSubheading)
-    let insertPoint = -1;
-    
-    // Look for \end{center} first
-    const centerEndMatch = fixedContent.match(/\\end\{center\}/);
-    if (centerEndMatch) {
-      insertPoint = centerEndMatch.index! + centerEndMatch[0].length;
-    } else {
-      // If no \end{center}, look for first \resumeSubheading
-      const resumeSubheadingMatch = fixedContent.match(/\\resumeSubheading/);
-      if (resumeSubheadingMatch) {
-        insertPoint = resumeSubheadingMatch.index!;
-      }
-    }
-    
-    if (insertPoint >= 0) {
-      const beforeInsert = fixedContent.substring(0, insertPoint);
-      const afterInsert = fixedContent.substring(insertPoint);
-      
-      fixedContent = beforeInsert + 
-        '\n\n\\section{Experience}\n  \\resumeSubHeadingListStart\n  \n' +
-        afterInsert;
-    }
-  }
-  
-  // Comprehensive validation and reporting
-  const validation = validateLatexStructure(fixedContent);
-  
-  console.log('📊 Document fix results:');
-  console.log(`   Original length: ${latexContent.length} characters`);
-  console.log(`   Fixed length: ${fixedContent.length} characters`);
-  console.log(`   Changes made: ${fixedContent !== latexContent ? 'YES' : 'NO'}`);
-  console.log(`   Validation status: ${validation.isValid ? '✅ VALID' : '❌ STILL HAS ISSUES'}`);
-  
-  if (!validation.isValid) {
-    console.warn('⚠️ Remaining issues after auto-fix:');
-    validation.errors.forEach((error, index) => {
-      console.warn(`   ${index + 1}. ${error}`);
-    });
-  }
-  
-  return {
-    fixedContent,
-    wasFixed: fixedContent !== latexContent,
-    validation,
-    changes: fixedContent !== latexContent ? 'Added missing LaTeX structure elements' : 'No changes needed'
-  };
-}
-
 export async function fixLatexDocumentFromError(
   originalContent: string,
   compilationError: string
