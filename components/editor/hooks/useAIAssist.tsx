@@ -5,6 +5,7 @@ import { readStreamableValue } from 'ai/rsc';
 import { calculateDiff } from '../utils/calculateDiff';
 import { createContentWidget } from '../utils/WidgetCreator';
 import { promptModal } from '../utils/promptModal';
+import { clearDiffData } from './useHoverProvider';
 import * as monaco from 'monaco-editor';
 import type { editor } from 'monaco-editor';
 
@@ -90,6 +91,8 @@ export const useAIAssist = () => {
         const userInput = await promptModal(editor, monacoInstance, selection);
         if (!userInput) {
           console.log('❌ User cancelled or no input provided');
+          // Очищаем diff данные если пользователь отменил операцию
+          clearDiffData();
           return;
         }
         
@@ -100,7 +103,20 @@ export const useAIAssist = () => {
         
         try {
           const stream = await generate(
-            `Selected text to modify:\n${oldText}\n\nUser request: ${userInput}\n\nPlease provide ONLY the modified version of the selected text.`
+            `КРИТИЧНО: Измени ТОЛЬКО выделенный текст, НЕ ДОБАВЛЯЙ И НЕ УДАЛЯЙ ничего за его пределами.
+
+Выделенный текст для изменения:
+"${oldText}"
+
+Запрос пользователя: ${userInput}
+
+ВАЖНО: 
+- Верни ТОЛЬКО измененную версию выделенного текста
+- НЕ добавляй дополнительный контекст, строки или символы
+- НЕ изменяй ничего за пределами выделения
+- Сохрани форматирование LaTeX если это применимо
+
+Измененная версия:`
           );
 
           let newText = '';
@@ -180,7 +196,7 @@ export const useAIAssist = () => {
             const contentWidget = createContentWidget(
               editor,
               monacoInstance,
-              selection,
+              selection, // Передаем изначальное выделение
               oldText,
               newText.trim(),
               currentLine,
@@ -192,9 +208,14 @@ export const useAIAssist = () => {
             editor.addContentWidget(contentWidget);
           } else {
             console.log('⚠️ AI returned empty response');
+            // Очищаем diff данные если AI вернул пустой ответ
+            clearDiffData();
           }
         } catch (error) {
           console.error('❌ Error in AI Assist:', error);
+          
+          // Очищаем diff данные в случае ошибки
+          clearDiffData();
           
           // Show error message to user
           const errorDiv = document.createElement('div');

@@ -2,6 +2,7 @@ import React from 'react'
 import Editor from '@monaco-editor/react'
 import { useEditorSetup } from './hooks/useEditorSetup'
 import { useAIAssist } from './hooks/useAIAssist'
+import { useHoverProvider } from './hooks/useHoverProvider'
 import { editorDefaultOptions } from './constants/editorDefaults'
 
 interface CodeEditorProps {
@@ -15,6 +16,7 @@ const EditorLoading = () => null
 export const CodeEditor = ({ onChange, value, setIsStreaming }: CodeEditorProps) => {
   const { editorRef, handleEditorDidMount } = useEditorSetup(onChange, value)
   const { handleAIAssist } = useAIAssist()
+  const { registerHoverProvider } = useHoverProvider()
 
   return (
     <Editor
@@ -27,6 +29,8 @@ export const CodeEditor = ({ onChange, value, setIsStreaming }: CodeEditorProps)
       onMount={(editor, monaco) => {
         handleEditorDidMount(editor, monaco)
         handleAIAssist(editor, monaco, setIsStreaming)
+        // Регистрируем hover provider для diff подсказок
+        registerHoverProvider(editor, monaco)
       }}
       options={editorDefaultOptions}
       loading={<EditorLoading />}
