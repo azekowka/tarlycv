@@ -1,7 +1,6 @@
 'use client'
 import '@ungap/with-resolvers'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
-import SideNav from '@/components/nav/side-nav'
 import LatexRenderer from '@/components/latex-render/latex'
 import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react'
@@ -11,6 +10,9 @@ import { useFrontend } from '@/contexts/FrontendContext'
 import { db } from '@/lib/constants'
 import { tx, id } from '@instantdb/react'
 import { useRouter } from 'next/navigation'
+import { ModeToggle } from '@/components/ui/mode-toggle'
+import { Input } from '@/components/ui/input'
+import { Search } from 'lucide-react'
 
 const EditorContainer = dynamic(() => import('@/components/editor/editor-container'), { ssr: false });
 
@@ -84,21 +86,20 @@ export default function ProjectsPage() {
     <div className="w-full h-full flex flex-col bg-muted/25">
       <div className="p-4 flex items-center justify-between">
         <h1 className="text-lg font-semibold">Tarly CVs</h1>
+        <ModeToggle />
       </div>
       <div className="p-4 flex space-x-2 relative">
-        <div className="flex-grow">
-          <input 
-            placeholder="Search resumes..." 
-            className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
-            disabled
-          />
-        </div>
+        <Search className="absolute left-7 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search resumes..."
+          className="flex-grow pl-10"
+        />
       </div>
       <div className="flex-grow overflow-auto">
         <div className="p-4">
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm font-medium">Files</span>
-            <button 
+            <button
               onClick={() => setIsCreateDialogOpen(true)}
               className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8"
             >
