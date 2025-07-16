@@ -8,10 +8,10 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 
 const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
-  title: 'Tarly CV',
+  title: 'Tarly CV Editor',
   description: 'Cursor for Resumes',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/favicon.svg',
   },
 }
 
