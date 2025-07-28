@@ -17,6 +17,7 @@ import { Loader2 } from 'lucide-react'
 import LatexLoading from './latex-loading'
 import LatexCanvas from './latex-canvas'
 import { updateProject } from '@/hooks/data'
+import { checkPaymentStatus, createCheckoutSession } from '@/lib/utils/payment-utils'
 
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs'
 
@@ -32,6 +33,8 @@ function LatexRenderer() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isDocumentReady, setIsDocumentReady] = useState(false)
+  const [isPaid, setIsPaid] = useState<boolean | null>(null)
+  const [isCheckingPayment, setIsCheckingPayment] = useState(false)
 
   useEffect(() => {
     if (!isDataLoading && data?.cachedPdfUrl) {
@@ -107,22 +110,72 @@ function LatexRenderer() {
     updateProject(projectId, { projectScale: 0.9 })
   }
 
-  const handleDownload = () => {
-    if (pdfUrl) {
-      fetch(pdfUrl)
-        .then(response => response.blob())
-        .then(blob => {
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `${data?.title || 'document'}.pdf`;
-          link.style.display = 'none';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-        })
-        .catch(error => console.error('Error downloading PDF:', error));
+  // Check payment status on component mount and when window regains focus
+  useEffect(() => {
+    const checkPayment = async () => {
+      if (projectId) {
+        setIsCheckingPayment(true);
+        const paymentStatus = await checkPaymentStatus(projectId);
+        setIsPaid(paymentStatus);
+        setIsCheckingPayment(false);
+      }
+    };
+    
+    checkPayment();
+    
+    // Listen for window focus to refresh payment status when user returns from payment
+    const handleFocus = () => {
+      checkPayment();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [projectId]);
+
+  const handleDownload = async () => {
+    if (!pdfUrl) return;
+
+    setIsCheckingPayment(true);
+    
+    try {
+      // Check current payment status
+      const currentPaymentStatus = await checkPaymentStatus(projectId);
+      setIsPaid(currentPaymentStatus);
+
+      if (currentPaymentStatus) {
+        // Project is paid, proceed with download
+        fetch(pdfUrl)
+          .then(response => response.blob())
+          .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${data?.title || 'document'}.pdf`;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          })
+          .catch(error => console.error('Error downloading PDF:', error));
+      } else {
+        // Project not paid, redirect to checkout
+        const checkoutUrl = await createCheckoutSession(projectId, data?.title || 'Resume');
+        
+        if (checkoutUrl) {
+          window.open(checkoutUrl, '_blank');
+        } else {
+          alert('Failed to create payment session. Please try again.');
+        }
+      }
+    } catch (error) {
+      console.error('Error processing download:', error);
+      alert('Error processing request. Please try again.');
+    } finally {
+      setIsCheckingPayment(false);
     }
   }
 
@@ -161,9 +214,15 @@ function LatexRenderer() {
           <Button variant="outline" size="sm" onClick={handleResetZoom}>
             <RotateCcw className="h-4 w-4" />
           </Button>
-          <Button size="sm" variant="destructive" className="flex items-center gap-2" onClick={handleDownload}>
+          <Button 
+            size="sm" 
+            variant={isPaid ? "destructive" : "default"} 
+            className="flex items-center gap-2" 
+            onClick={handleDownload}
+            disabled={isCheckingPayment}
+          >
             <Download className="h-4 w-4" />
-            Export PDF
+            {isCheckingPayment ? 'Checking...' : isPaid ? 'Export PDF' : 'Export PDF'}
           </Button>
         </div>
       </div>
