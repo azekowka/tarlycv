@@ -52,8 +52,8 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper function to check if a project is paid
-export function isProjectPaid(projectId: string): boolean {
+// Helper function to check if a project is paid (internal use only)
+function isProjectPaid(projectId: string): boolean {
   return paidProjects.has(projectId);
 }
 
