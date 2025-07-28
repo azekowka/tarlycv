@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import LoadingSideNav from '@/components/nav/loading-side-nav'
 import { useProject } from '@/contexts/ProjectContext'
+import { BackToDashboardButton } from '@/components/ui/BackToDashboardButton'
 
 interface SideNavProps {
   onOpenCreateDialog?: () => void;
@@ -68,7 +69,9 @@ export default function SideNav({ onOpenCreateDialog }: SideNavProps) {
       <div className="flex-grow overflow-auto">
         <FileTree projectId={projectId} query={query} onOpenCreateDialog={onOpenCreateDialog} />
       </div>
-
+      <div className="p-4 border-t border-border">
+        <BackToDashboardButton />
+      </div>
     </div>
   )
 }

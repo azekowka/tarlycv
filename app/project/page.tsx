@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation'
 import { ModeToggle } from '@/components/ui/mode-toggle'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
+import { BackToDashboardButton } from '@/components/ui/BackToDashboardButton'
 
 const EditorContainer = dynamic(() => import('@/components/editor/editor-container'), { ssr: false });
 
@@ -85,7 +86,7 @@ export default function ProjectsPage() {
   const EmptySideNav = () => (
     <div className="w-full h-full flex flex-col bg-muted/25">
       <div className="p-4 flex items-center justify-between">
-        <h1 className="text-lg font-semibold">Tarly CVs</h1>
+        <h1 className="text-lg font-semibold">Tarly CV Editor</h1>
         <ModeToggle />
       </div>
       <div className="p-4 flex space-x-2 relative">
@@ -113,6 +114,9 @@ export default function ProjectsPage() {
             <p className="text-xs mt-1">Click + to create your first file</p>
           </div>
         </div>
+      </div>
+      <div className="p-4 border-t border-border">
+        <BackToDashboardButton />
       </div>
     </div>
   )
